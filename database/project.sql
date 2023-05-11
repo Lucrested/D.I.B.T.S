@@ -74,7 +74,6 @@ CREATE TABLE Invoice (
                        ON UPDATE CASCADE ON DELETE CASCADE
 );
 
--------------
 
 CREATE TABLE Line (
  invoiceNumber int,
@@ -89,6 +88,7 @@ CREATE TABLE Line (
   CONSTRAINT is_found_in FOREIGN KEY (itemCode) REFERENCES Item(itemCode)
                           ON UPDATE CASCADE ON DELETE CASCADE
 );
+
 
 
 CREATE TABLE Faculty (
