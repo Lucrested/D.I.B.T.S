@@ -101,4 +101,16 @@ CREATE TABLE Student (
   major VARCHAR(50)
 );
 
+CREATE TABLE Cart (
+  itemCode varchar(10) PRIMARY KEY,
+  cartItemQuantity      smallint not null DEFAULT 1,
+  cartItemName          varchar(35),
+  cartItemPrice         decimal(8,2),
+  
 
+CONSTRAINT itemCodeForeignKey FOREIGN KEY (itemCode) REFERENCES Item(itemCode)
+	ON UPDATE CASCADE ON DELETE CASCADE
+	
+);
+
+-- hola amihos
