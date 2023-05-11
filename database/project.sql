@@ -106,8 +106,6 @@ CREATE TABLE Cart (
   cartItemQuantity      smallint not null DEFAULT 1,
   cartItemName          varchar(35),
   cartItemPrice         decimal(8,2),
-  
-
 CONSTRAINT itemCodeForeignKey FOREIGN KEY (itemCode) REFERENCES Item(itemCode)
 	ON UPDATE CASCADE ON DELETE CASCADE
 	
