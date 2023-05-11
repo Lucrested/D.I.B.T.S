@@ -1,4 +1,5 @@
 var DataTypes = require("sequelize").DataTypes;
+var _cart = require("./cart");
 var _customer = require("./customer");
 var _faculty = require("./faculty");
 var _invoice = require("./invoice");
@@ -10,6 +11,7 @@ var _student = require("./student");
 var _supplier = require("./supplier");
 
 function initModels(sequelize) {
+  var cart = _cart(sequelize, DataTypes);
   var customer = _customer(sequelize, DataTypes);
   var faculty = _faculty(sequelize, DataTypes);
   var invoice = _invoice(sequelize, DataTypes);
@@ -31,6 +33,8 @@ function initModels(sequelize) {
     foreignKey: "invoicenumber",
   });
   invoice.hasMany(line, { as: "lines", foreignKey: "invoicenumber" });
+  cart.belongsTo(item, { as: "itemcode_item", foreignKey: "itemcode" });
+  item.hasOne(cart, { as: "cart", foreignKey: "itemcode" });
   line.belongsTo(item, { as: "itemcode_item", foreignKey: "itemcode" });
   item.hasMany(line, { as: "lines", foreignKey: "itemcode" });
   staff.belongsTo(job, { as: "jobcode_job", foreignKey: "jobcode" });
@@ -41,6 +45,7 @@ function initModels(sequelize) {
   supplier.hasMany(item, { as: "items", foreignKey: "supplierid" });
 
   return {
+    Cart: cart,
     Customer: customer,
     Faculty: faculty,
     Invoice: invoice,

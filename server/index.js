@@ -14,7 +14,7 @@ const {
 
 async function test() {
   try {
-    await sequelize.authenticate();
+    // await sequelize.authenticate();
     // const customer = await Customer.create({
     //   customerfname: "a",
     //   customerlname: "d",
@@ -25,11 +25,11 @@ async function test() {
     //   cus_type: "s",
     // });
 
-    const customers = await Customer.findOne({
+    const customers = await Customer.findAll({
       raw: true,
       attributes: ["customerfname"],
-      where: { customerid: 1 },
     });
+
     console.log(customers);
     console.log("Connection has been established successfully.");
   } catch (error) {
