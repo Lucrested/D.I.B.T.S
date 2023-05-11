@@ -112,3 +112,5 @@ CONSTRAINT itemCodeForeignKey FOREIGN KEY (itemCode) REFERENCES Item(itemCode)
 	ON UPDATE CASCADE ON DELETE CASCADE
 	
 );
+
+-- hola amihos
