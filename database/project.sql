@@ -112,3 +112,113 @@ CONSTRAINT itemCodeForeignKey FOREIGN KEY (itemCode) REFERENCES Item(itemCode)
 );
 
 
+
+--trigger to check customer balance when adding to cart
+CREATE FUNCTION checkBalance() RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+IF (balance - NEW.cartItemQuantity*NEW.cartItemPrice) < 0 THEN RAISE EXCEPTION 'Quantity not available';
+END IF;
+RETURN NEW;
+END;
+$$;
+ 
+
+CREATE TRIGGER trgr BEFORE INSERT ON
+Cart FOR EACH ROW
+EXECUTE FUNCTION checkBalance();
+
+
+--trigger to check quantity available when adding to cart (or updating)
+
+CREATE FUNCTION checkQuantity() RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  currentQ int;
+
+BEGIN
+  currentQ := (SELECT itemQuantity FROM Item WHERE itemCode = NEW.itemCode);
+  IF currentQ < NEW.cartItemQuantity THEN RAISE EXCEPTION 'Quantity not available';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+CREATE TRIGGER trQuantityCheck BEFORE INSERT ON Cart 
+FOR EACH ROW
+EXECUTE FUNCTION checkQuantity();
+
+
+
+
+--------------trigger to decrease quantity after line
+
+CREATE FUNCTION updateQuantity() RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE Item
+  SET itemQuantity = itemQuantity - NEW.lineQuantity
+  WHERE itemCode = (SELECT itemCode
+                        FROM Item
+                        WHERE itemCode = NEW.itemCode);
+  RETURN NEW;
+END;
+$$;
+
+
+CREATE TRIGGER trLineQuantity AFTER INSERT ON Line 
+FOR EACH ROW
+EXECUTE FUNCTION updateQuantity();
+
+
+------------trigger to add new line to invoice
+
+CREATE FUNCTION updateInvoice() RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  INSERT INTO Invoice VALUES (NEW.invoiceNumber, NEW.customerID, NEW.invoiceDate, NEW.staffID );
+
+  RETURN NEW;
+END;
+$$;
+
+
+CREATE TRIGGER trInvoice AFTER INSERT ON Line 
+FOR EACH ROW
+EXECUTE FUNCTION updateInvoice();
+
+
+----------------- trigger to update customer balance after something added to line
+
+CREATE FUNCTION updateCustomer() RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE Customer
+  SET customerBalance = customerBalance + NEW.unitPrice * NEW.lineQuantity
+  WHERE customerID = (SELECT customerID
+                        FROM Invoice
+                        WHERE invoiceNumber = NEW.invoiceNumber);
+  RETURN NEW;
+END;
+$$;
+
+
+CREATE TRIGGER trLineBalance AFTER INSERT ON Line 
+FOR EACH ROW
+EXECUTE FUNCTION updateCustomer();
+
+---------------- view for total cart
+
+CREATE VIEW totalCart AS
+SELECT SUM(cartItemPrice * cartItemQuantity)
+FROM Cart;
+
+
+
