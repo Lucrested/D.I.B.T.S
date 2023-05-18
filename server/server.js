@@ -67,3 +67,21 @@ app.delete("/cart/:itemCode", async (req, res) => {
     console.error(err.message);
   }
 });
+
+// update item in cart UNTESTED!!!!!!!
+
+app.put("/cart:itemCode", async (req,res) => {
+  try{
+      const { itemCode } = req.params;
+      const { cartItemQuantity } = req.body;
+      const updateCart = await pool.query( "UPDATE Cart SET cartItemQuantity = $1 WHERE itemCode = $2", 
+      [cartItemQuantity, itemCode]
+      );
+
+      req.json("Cart was updated");
+  }catch (err) {
+      console.error(err.message);
+  }
+
+
+});
