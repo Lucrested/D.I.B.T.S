@@ -68,7 +68,7 @@ CREATE TABLE Invoice (
  invoiceNumber int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  customerID  int not null,
  invoiceDate   date not null,
- staffID		int not null,
+ staffID		int,
  CONSTRAINT generates FOREIGN KEY (customerID) REFERENCES Customer(customerID)
                        ON UPDATE CASCADE ON DELETE CASCADE,
  CONSTRAINT generate FOREIGN KEY (staffID) REFERENCES Staff(staffID)
@@ -78,7 +78,7 @@ CREATE TABLE Invoice (
 
 CREATE TABLE Line (
  invoiceNumber int,
- lineNumber    smallint,
+ lineNumber    GENERATED ALWAYS AS IDENTITY smallint,
  itemCode   varchar(10) not null,
  lineQuantity      smallint not null DEFAULT 1,
  unitPrice     decimal(8, 2) not null,
@@ -109,7 +109,6 @@ CREATE TABLE Cart (
   cartItemPrice         decimal(8,2),
 CONSTRAINT itemCodeForeignKey FOREIGN KEY (itemCode) REFERENCES Item(itemCode)
 	ON UPDATE CASCADE ON DELETE CASCADE
-	
 );
 
 
