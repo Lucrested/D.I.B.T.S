@@ -62,7 +62,7 @@ app.delete("/cart/:itemCode", async (req, res) => {
       [itemCode]
     );
 
-    res.json("Item with deleted from Cart");
+    res.json("Item was deleted from Cart");
   } catch (err) {
     console.error(err.message);
   }
@@ -70,18 +70,17 @@ app.delete("/cart/:itemCode", async (req, res) => {
 
 // update item in cart UNTESTED!!!!!!!
 
-app.put("/cart:itemCode", async (req,res) => {
-  try{
-      const { itemCode } = req.params;
-      const { cartItemQuantity } = req.body;
-      const updateCart = await pool.query( "UPDATE Cart SET cartItemQuantity = $1 WHERE itemCode = $2", 
+app.put("/cart:itemCode", async (req, res) => {
+  try {
+    const { itemCode } = req.params;
+    const { cartItemQuantity } = req.body;
+    const updateCart = await pool.query(
+      "UPDATE Cart SET cartItemQuantity = $1 WHERE itemCode = $2",
       [cartItemQuantity, itemCode]
-      );
+    );
 
-      req.json("Cart was updated");
-  }catch (err) {
-      console.error(err.message);
+    req.json("Cart was updated");
+  } catch (err) {
+    console.error(err.message);
   }
-
-
 });
