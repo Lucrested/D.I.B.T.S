@@ -15,7 +15,7 @@ app.listen(8000, () => console.log("Server Started"));
 
 app.get("/menu", async (req, res) => {
   try {
-    const allItems = await pool.query("SELECT * FROM Items");
+    const allItems = await pool.query("SELECT * FROM Item");
     res.json(allItems.rows);
   } catch (error) {
     console.log(error.message);
