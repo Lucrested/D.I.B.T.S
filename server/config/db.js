@@ -1,14 +1,11 @@
-const { Sequelize } = require("sequelize");
-const initModels = require("../models/init-models");
+const Pool = require("pg").Pool;
 
-module.exports.sequelize = new Sequelize(
-  "postgres",
-  "postgres",
-  "Joudarym123",
-  {
-    host: "localhost",
-    dialect: "postgres",
-  }
-);
+const pool = new Pool({
+  user: "postgres",
+  password: "Joudarym123",
+  host: "localhost",
+  port: 5432,
+  database: "postgres",
+});
 
-module.exports.models = initModels(module.exports.sequelize);
+module.exports = pool;

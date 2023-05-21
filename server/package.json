@@ -3,19 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "nodemon server.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.5",
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "jslint": "^0.12.1",
     "next": "13.4.1",
     "next-redux-wrapper": "^8.1.0",
     "node": "^20.1.0",
-    "pg": "^8.10.0",
+    "nodemon": "^2.0.22",
+    "pg": "^8.11.0",
     "pg-hstore": "^2.3.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
