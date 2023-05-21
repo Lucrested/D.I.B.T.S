@@ -35,6 +35,7 @@ CREATE TABLE Item (
  itemName           varchar(35) not null,
  itemPrice                 decimal(8, 2),
  itemQuantity        smallint not null,
+ imageHREF          varchar(512),
  supplierID            int,
 
  CONSTRAINT supplies FOREIGN KEY (supplierID) REFERENCES Supplier(supplierID)
@@ -67,10 +68,8 @@ CREATE TABLE Staff(
 CREATE TABLE Invoice (
  invoiceNumber int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  customerID  int not null,
- invoiceDate   date not null,
+ invoiceDate   timestamp not null,
  staffID		int,
- CONSTRAINT generates FOREIGN KEY (customerID) REFERENCES Customer(customerID)
-                       ON UPDATE CASCADE ON DELETE CASCADE,
  CONSTRAINT generate FOREIGN KEY (staffID) REFERENCES Staff(staffID)
                        ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -105,29 +104,27 @@ CREATE TABLE Student (
 CREATE TABLE Cart (
   itemCode varchar(10) PRIMARY KEY,
   cartItemQuantity      smallint not null DEFAULT 1,
-  cartItemName          varchar(35),
-  cartItemPrice         decimal(8,2),
 CONSTRAINT itemCodeForeignKey FOREIGN KEY (itemCode) REFERENCES Item(itemCode)
 	ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 
 
---trigger to check customer balance when adding to cart
-CREATE FUNCTION checkBalance() RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-BEGIN
-IF (balance - NEW.cartItemQuantity*NEW.cartItemPrice) < 0 THEN RAISE EXCEPTION 'Quantity not available';
-END IF;
-RETURN NEW;
-END;
-$$;
- 
+-- --trigger to check customer balance when adding to cart
+-- CREATE FUNCTION checkBalance() RETURNS TRIGGER
+-- LANGUAGE plpgsql
+-- AS $$
+-- BEGIN
+-- IF (balance - NEW.cartItemQuantity*NEW.cartItemPrice) < 0 THEN RAISE EXCEPTION 'Quantity not available';
+-- END IF;
+-- RETURN NEW;
+-- END;
+-- $$;
+--  
 
-CREATE TRIGGER trgr BEFORE INSERT ON
-Cart FOR EACH ROW
-EXECUTE FUNCTION checkBalance();
+-- CREATE TRIGGER trgr BEFORE INSERT ON
+-- Cart FOR EACH ROW
+-- EXECUTE FUNCTION checkBalance();
 
 
 --trigger to check quantity available when adding to cart (or updating)
@@ -176,23 +173,6 @@ FOR EACH ROW
 EXECUTE FUNCTION updateQuantity();
 
 
-------------trigger to add new line to invoice
-
-CREATE FUNCTION updateInvoice() RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  INSERT INTO Invoice VALUES (NEW.invoiceNumber, NEW.customerID, NEW.invoiceDate, NEW.staffID );
-
-  RETURN NEW;
-END;
-$$;
-
-
-CREATE TRIGGER trInvoice AFTER INSERT ON Line 
-FOR EACH ROW
-EXECUTE FUNCTION updateInvoice();
-
 
 ----------------- trigger to update customer balance after something added to line
 
@@ -214,11 +194,40 @@ CREATE TRIGGER trLineBalance AFTER INSERT ON Line
 FOR EACH ROW
 EXECUTE FUNCTION updateCustomer();
 
----------------- view for total cart
-
-CREATE VIEW totalCart AS
-SELECT SUM(cartItemPrice * cartItemQuantity)
-FROM Cart;
 
 
+--checkout 
 
+CREATE OR REPLACE PROCEDURE CheckOut ()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+
+
+INSERT INTO Invoice(customerID, invoiceDate) VALUES(101010, NOW());
+INSERT INTO Line(
+  invoiceNumber,
+  itemCode, 
+  lineQuantity, 
+  unitPrice
+) 
+SELECT 
+  (
+    SELECT 
+      invoiceNumber 
+    FROM 
+      Invoice 
+    ORDER BY 
+      invoiceDate DESC 
+    LIMIT 
+      1
+  ), cart.itemCode, 
+  CartItemQuantity, 
+  itemPrice 
+FROM 
+  Cart JOIN Item 
+  ON cart.itemcode = item.itemcode;
+DELETE FROM Cart; 
+
+END;
+$$;
